@@ -36,7 +36,7 @@ class _JournalPageState extends State<JournalPage> {
   final _auth = FirebaseAuth.instance;
   String _selectedPrompt = '';
 
-  void geminiFunctionCalling() async {
+  Future<void> geminiFunctionCalling() async {
     print("Running analysis");
     String systemPrompt =
         "Act as a therapist and analyze the user's journal entry. Provide me with five emotions the user is feeling. Don’t need to give a reason behind why that user is feeling those emotion";
@@ -53,13 +53,15 @@ class _JournalPageState extends State<JournalPage> {
     final response = await chat.sendMessage(Content.text(message));
 
     print("Analysis ran, printing result:");
-    print(response.text!);
+    resultEmotions = response.text!;
     print("Result printed.");
 
     if (!mounted) return;
 
     setState(() {
-      resultEmotions = response.text!;
+      emotions = resultEmotions.split(',');
+      emotions = emotions.map((emotion) => emotion.trim()).toList();
+      //print(emotions);
     });
   }
 
@@ -247,11 +249,11 @@ class _JournalPageState extends State<JournalPage> {
                 child: SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       DateTime now = DateTime.now();
-                      final journalEntry = JournalEntry(dateTime: now, content: _textEditingController.text, userID: currentUser!.uid, emotions: []);
-                      //_dbServivce.create(journalEntry);
-                      geminiFunctionCalling();
+                      await geminiFunctionCalling();
+                      final journalEntry = JournalEntry(dateTime: now, content: _textEditingController.text.trim(), userID: currentUser!.uid, emotions: emotions);
+                      _dbServivce.create(journalEntry);
                       Navigator.push(
                         context,
                         MaterialPageRoute(

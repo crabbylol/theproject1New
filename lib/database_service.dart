@@ -14,7 +14,8 @@ class DatabaseService {
       _fire.collection("journalEntries").add({
         "dateTime": Timestamp.fromDate(journalEntry.dateTime),
         "content": journalEntry.content,
-        "userID": journalEntry.userID
+        "userID": journalEntry.userID,
+        "emotions" : journalEntry.emotions
       });
     } catch (e) {
       print(e.toString());
@@ -48,7 +49,7 @@ class DatabaseService {
           dateTime: (doc['dateTime'] as Timestamp).toDate(),
           content: doc['content'],
           userID: doc['userID'],
-          emotions: []
+          emotions: doc['emotions']
         );
       }).toList();
 
