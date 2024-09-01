@@ -30,6 +30,7 @@ class _JournalPageState extends State<JournalPage> {
 
   List<String> emotions = [];
   String resultEmotions = '';
+  String advice = '';
 
   final TextEditingController _textEditingController = TextEditingController();
   final _dbServivce = DatabaseService();
@@ -44,6 +45,8 @@ class _JournalPageState extends State<JournalPage> {
         'Here is the journal entry: ${_textEditingController.text}'
         'Please only return the result in a string that only includes the words separated by commas';
 
+    String userPrompt_advice = "Next, analysis this journal entry again. If the emotions are positive give encouraging words and ways to keep those positive emotions up. If emotions are negative give a 5 step actionable plan to do over the course of a week that is backed up by scientific evidence to improve those emotions while giving words of affirmation at the end.";
+
     final chat = model.startChat(history: [
       Content.text(userPrompt),
       Content.model([TextPart(systemPrompt)])
@@ -56,12 +59,18 @@ class _JournalPageState extends State<JournalPage> {
     resultEmotions = response.text!;
     print("Result printed.");
 
+    final getAdvice = userPrompt_advice;
+    final response_advice = await chat.sendMessage(Content.text(getAdvice));
+
+    advice = response_advice.text!;
+    //print(advice);
+
     if (!mounted) return;
 
     setState(() {
       emotions = resultEmotions.split(',');
       emotions = emotions.map((emotion) => emotion.trim()).toList();
-      print(emotions);
+      //print(emotions);
     });
   }
 

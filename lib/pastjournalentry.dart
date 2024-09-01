@@ -9,6 +9,7 @@ class PastJournalEntryPage extends StatefulWidget {
   final DateTime dateTime;
   final String content;
   final List<dynamic> emotions;
+  final int entryNumber;
 
   const PastJournalEntryPage({
     Key? key,
@@ -16,6 +17,7 @@ class PastJournalEntryPage extends StatefulWidget {
     required this.dateTime,
     required this.content,
     required this.emotions,
+    required this.entryNumber,
   }) : super(key: key);
 
   @override
@@ -71,41 +73,97 @@ class _PastJournalEntryPageState extends State<PastJournalEntryPage> {
                   ),
                   const SizedBox(height: 20.0),
                   Expanded(
-                    child: Row (
+                    child: Column (
                       children: <Widget> [
                         Expanded(
-                          child: Container(
-                            padding: const EdgeInsets.all(20.0),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF6D4),
-                              borderRadius: BorderRadius.circular(20.0),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  spreadRadius: 2,
-                                  blurRadius: 5,
-                                  offset: Offset(0, 3),
-                                ),
-                              ],
-                            ),
-                            child: SingleChildScrollView(
-                              child: Text(
-                                widget.content,
-                                style: GoogleFonts.rubik(
-                                  fontSize: 24,
-                                  color: const Color(0xFF482BAD),
-                                ),
-                                ),
+                          child: ExpansionTile(
+                            title: Text(
+                              "Advice",
+                              style: GoogleFonts.rubik(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF482BAD),
                               ),
                             ),
+                            trailing: Icon(
+                                Icons.arrow_drop_down_circle
+                            ),
+                            children: <Widget>[
+                              Container(
+                                padding: const EdgeInsets.all(20.0),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF6D4),
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: SingleChildScrollView(
+                                  child: Text(
+                                    "blah",
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 24,
+                                      color: const Color(0xFF482BAD),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
+                        ),
+                        Expanded(
+                          child: ExpansionTile(
+                            title: Text(
+                              "Journal Entry ${widget.entryNumber}",
+                              style: GoogleFonts.rubik(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF482BAD),
+                              ),
+                            ),
+                            trailing: Icon(
+                                  Icons.arrow_drop_down_circle
+                            ),
+                            children: <Widget>[
+                              Container(
+                                padding: const EdgeInsets.all(20.0),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFF6D4),
+                                  borderRadius: BorderRadius.circular(20.0),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.grey.withOpacity(0.3),
+                                      spreadRadius: 2,
+                                      blurRadius: 5,
+                                      offset: Offset(0, 3),
+                                    ),
+                                  ],
+                                ),
+                                child: SingleChildScrollView(
+                                  child: Text(
+                                    widget.content,
+                                    style: GoogleFonts.rubik(
+                                      fontSize: 24,
+                                      color: const Color(0xFF482BAD),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ],
               ),
             ),
-          ),
+      ),
     );
   }
 }

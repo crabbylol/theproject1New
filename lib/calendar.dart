@@ -36,39 +36,49 @@ class _CalendarPageState extends State<CalendarPage> {
   List<String> emotions = [];
   String resultEmotions = '';
 
-  Future<void> geminiFunctionCalling() async {
-    print("Running analysis");
-    String systemPrompt =
-        "Act as a therapist and analyze the user's journal entries. Provide me with the top three emotions the user is feeling. Don’t need to give a reason behind why that user is feeling those emotions. Do not include numbers, punctuations, new lines, and any text formatting. I want just the words.";
-
-    // Combine all journal entries into a single string
-    String userPrompt = '';
-    await monthlyEntries!.then((entries) {
-      for (var entry in entries) {
-        userPrompt += entry.content + '\n'; // Add newline for each entry
-      }
-    });
-
-    final chat = model.startChat(history: [
-      Content.text(userPrompt),
-      Content.model([TextPart(systemPrompt)])
-    ]);
-
-    final message = userPrompt;
-    final response = await chat.sendMessage(Content.text(message));
-
-    print("Analysis ran, printing result:");
-    resultEmotions = response.text!;
-    print("Result printed.");
-
-    if (!mounted) return;
-
-    setState(() {
-      emotions = resultEmotions.split(',');
-      emotions = emotions.map((emotion) => emotion.trim()).toList();
-      print(emotions);
-    });
-  }
+  // Future<void> geminiFunctionCalling() async {
+  //   print("Running analysis");
+  //
+  //   // Revised system prompt:
+  //   String systemPrompt =
+  //       "Analyze the user's journal entries and identify the top three emotions the user might be feeling.";
+  //
+  //   // Combine all journal entries into a single string
+  //   String userPrompt = '';
+  //   await monthlyEntries!.then((entries) {
+  //     for (var entry in entries) {
+  //       userPrompt += entry.content + '\n';
+  //     }
+  //   });
+  //
+  //   // Pre-process the user prompt to remove unwanted characters (optional)
+  //   userPrompt = userPrompt.replaceAll(RegExp(r'[0-9\.,\n]'), '');
+  //
+  //   final chat = model.startChat(history: [
+  //     Content.text(userPrompt),
+  //     Content.model([TextPart(systemPrompt)])
+  //   ]);
+  //
+  //   final message = userPrompt;
+  //   final response = await chat.sendMessage(Content.text(message));
+  //
+  //   print("Analysis ran, printing result:");
+  //   resultEmotions = response.text!;
+  //   print("Result printed.");
+  //
+  //   if (!mounted) return;
+  //
+  //   setState(() {
+  //     // Extract the top three emotions using regular expressions
+  //     final emotionRegex = RegExp(r'(?!emotions|is|are|feeling|feel)(\w+)\s*:\s*(.*)');
+  //     final matches = emotionRegex.allMatches(resultEmotions);
+  //
+  //     emotions = matches.map((match) => match.group(1)!.toLowerCase()).toList();
+  //     emotions = emotions.take(3).toList(); // Take only the top three emotions
+  //
+  //     print(emotions);
+  //   });
+  // }
 
   @override
   void initState() {
@@ -81,7 +91,7 @@ class _CalendarPageState extends State<CalendarPage> {
     monthlyEntries!.then((entries) {
       // Access entries here
       //print("Number of entries: ${entries.length}");
-      geminiFunctionCalling();
+      //geminiFunctionCalling();
     });
   }
 
