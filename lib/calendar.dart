@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
 import 'package:theproject1/auth_service.dart';
 import 'package:theproject1/datedetailspage.dart';
 import 'package:theproject1/day.dart';
 import 'package:theproject1/loginpagewithemail.dart';
+import 'database_service.dart';
 import 'journal.dart';
+import 'journalentry.dart';
 
 class CalendarPage extends StatefulWidget {
   final int initialYear;
@@ -21,11 +25,64 @@ class _CalendarPageState extends State<CalendarPage> {
   int year = 0;
   int month = 0;
 
+  final _dbServivce = DatabaseService();
+  Future<List<JournalEntry>>? monthlyEntries;
+
+  late final model = GenerativeModel(
+    apiKey: dotenv.env['OPENAI_API_KEY']!,
+    model: 'gemini-pro',
+  );
+
+  List<String> emotions = [];
+  String resultEmotions = '';
+
+  Future<void> geminiFunctionCalling() async {
+    print("Running analysis");
+    String systemPrompt =
+        "Act as a therapist and analyze the user's journal entries. Provide me with the top three emotions the user is feeling. Don’t need to give a reason behind why that user is feeling those emotions. Do not include numbers, punctuations, new lines, and any text formatting. I want just the words.";
+
+    // Combine all journal entries into a single string
+    String userPrompt = '';
+    await monthlyEntries!.then((entries) {
+      for (var entry in entries) {
+        userPrompt += entry.content + '\n'; // Add newline for each entry
+      }
+    });
+
+    final chat = model.startChat(history: [
+      Content.text(userPrompt),
+      Content.model([TextPart(systemPrompt)])
+    ]);
+
+    final message = userPrompt;
+    final response = await chat.sendMessage(Content.text(message));
+
+    print("Analysis ran, printing result:");
+    resultEmotions = response.text!;
+    print("Result printed.");
+
+    if (!mounted) return;
+
+    setState(() {
+      emotions = resultEmotions.split(',');
+      emotions = emotions.map((emotion) => emotion.trim()).toList();
+      print(emotions);
+    });
+  }
+
   @override
   void initState() {
     super.initState();
     year = widget.initialYear;
     month = widget.initialMonth;
+
+    monthlyEntries = _dbServivce.getJournalEntriesByMonthYear(year, month);
+
+    monthlyEntries!.then((entries) {
+      // Access entries here
+      //print("Number of entries: ${entries.length}");
+      geminiFunctionCalling();
+    });
   }
 
   @override

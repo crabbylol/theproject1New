@@ -8,7 +8,7 @@ class PastJournalEntryPage extends StatefulWidget {
   final Day day;
   final DateTime dateTime;
   final String content;
-  final List<String> emotions;
+  final List<dynamic> emotions;
 
   const PastJournalEntryPage({
     Key? key,
@@ -61,7 +61,7 @@ class _PastJournalEntryPageState extends State<PastJournalEntryPage> {
                       borderRadius: BorderRadius.circular(30.0),
                     ),
                     child: Text(
-                      "blah",
+                      widget.emotions.isNotEmpty? widget.emotions [0]: "",
                       style: GoogleFonts.rubik(
                         fontSize: 35,
                         color: const Color(0xFFFFFCF2),

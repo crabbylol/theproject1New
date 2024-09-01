@@ -5,7 +5,7 @@ class JournalEntry {
   DateTime dateTime;
   String content;
   String userID;
-  List<String> emotions;
+  List<dynamic> emotions;
 
   JournalEntry({
     // required this.primarymood,

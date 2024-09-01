@@ -61,7 +61,7 @@ class _JournalPageState extends State<JournalPage> {
     setState(() {
       emotions = resultEmotions.split(',');
       emotions = emotions.map((emotion) => emotion.trim()).toList();
-      //print(emotions);
+      print(emotions);
     });
   }
 

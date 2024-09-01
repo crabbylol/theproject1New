@@ -59,4 +59,38 @@ class DatabaseService {
       return [];
     }
   }
+
+  Future<List<JournalEntry>> getJournalEntriesByMonthYear(int year, int month) async {
+    //print("Year: ${year}");
+    //print("Month: ${month}");
+
+    final User? currentUser = _auth.currentUser;
+
+    if (currentUser != null) {
+      final DateTime firstDayOfMonth = DateTime(year, month, 1);
+      final DateTime lastDayOfMonth = DateTime(year, month + 1, 0); // Get last day of previous month (zero-based indexing)
+
+      final query = _fire
+          .collection("journalEntries")
+          .where('userID', isEqualTo: currentUser.uid)
+          .where('dateTime', isGreaterThanOrEqualTo: Timestamp.fromDate(firstDayOfMonth))
+          .where('dateTime', isLessThan: Timestamp.fromDate(lastDayOfMonth.add(const Duration(days: 1))));  // Add 1 day to include entries on the last day
+
+      final querySnapshot = await query.get();
+
+      final entries = querySnapshot.docs.map((doc) {
+        return JournalEntry(
+          dateTime: (doc['dateTime'] as Timestamp).toDate(),
+          content: doc['content'],
+          userID: doc['userID'],
+          emotions: doc['emotions'],
+        );
+      }).toList();
+
+      return entries;
+    } else {
+      print("No user is currently logged in!");
+      return [];
+    }
+  }
 }
