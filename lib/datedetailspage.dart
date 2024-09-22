@@ -94,7 +94,7 @@ class _DateDetailsPageState extends State<DateDetailsPage> {
                                         Navigator.push(
                                           context,
                                           MaterialPageRoute(
-                                            builder: (context) => PastJournalEntryPage(day: widget.day, dateTime: entry.dateTime, content: entry.content, emotions: entry.emotions, entryNumber: index+1),
+                                            builder: (context) => PastJournalEntryPage(day: widget.day, dateTime: entry.dateTime, content: entry.content, emotions: entry.emotions, entryNumber: index+1, advice: entry.advice),
                                           ),
                                         );
                                       },

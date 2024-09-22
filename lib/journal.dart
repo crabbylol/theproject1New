@@ -37,6 +37,7 @@ class _JournalPageState extends State<JournalPage> {
   final _auth = FirebaseAuth.instance;
   String _selectedPrompt = '';
 
+
   Future<void> geminiFunctionCalling() async {
     print("Running analysis");
     String systemPrompt =
@@ -45,7 +46,7 @@ class _JournalPageState extends State<JournalPage> {
         'Here is the journal entry: ${_textEditingController.text}'
         'Please only return the result in a string that only includes the words separated by commas';
 
-    String userPrompt_advice = "Next, analysis this journal entry again. If the emotions are positive give encouraging words and ways to keep those positive emotions up. If emotions are negative give a 5 step actionable plan to do over the course of a week that is backed up by scientific evidence to improve those emotions while giving words of affirmation at the end.";
+    String userPrompt_advice = "Analyze this journal entry (without printing it out). Provide encouraging words, followed by a 5-step actionable plan (number each step) to be completed over the course of a week. The plan should be backed by scientific evidence and past journal entries to understand the person's character and improve their emotions. Conclude with additional words of affirmation. Ensure that the response is in plain font and that there are no subsection titles or bold formatting.";
 
     final chat = model.startChat(history: [
       Content.text(userPrompt),
@@ -261,7 +262,7 @@ class _JournalPageState extends State<JournalPage> {
                     onPressed: () async {
                       DateTime now = DateTime.now();
                       await geminiFunctionCalling();
-                      final journalEntry = JournalEntry(dateTime: now, content: _textEditingController.text.trim(), userID: currentUser!.uid, emotions: emotions);
+                      final journalEntry = JournalEntry(dateTime: now, content: _textEditingController.text.trim(), userID: currentUser!.uid, emotions: emotions, advice: advice);
                       _dbServivce.create(journalEntry);
                       Navigator.push(
                         context,

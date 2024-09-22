@@ -197,7 +197,7 @@ class _SignupPageState extends State<SignupPage> {
   );
 
   _signup() async {
-    final user = await _auth.createUserWithEmailAndPassword(_emailController.text, _passwordController.text);
+    final user = await _auth.createUserWithEmailAndPassword(_usernameController.text,_emailController.text, _passwordController.text);
     if (user != null) {
       print("User created successfully");
       goToHome(context);

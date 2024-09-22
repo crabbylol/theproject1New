@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'day.dart';
-import 'journalentry.dart';
 
 class PastJournalEntryPage extends StatefulWidget {
   final Day day;
@@ -10,6 +9,7 @@ class PastJournalEntryPage extends StatefulWidget {
   final String content;
   final List<dynamic> emotions;
   final int entryNumber;
+  final String advice;
 
   const PastJournalEntryPage({
     Key? key,
@@ -18,6 +18,7 @@ class PastJournalEntryPage extends StatefulWidget {
     required this.content,
     required this.emotions,
     required this.entryNumber,
+    required this.advice
   }) : super(key: key);
 
   @override
@@ -25,144 +26,150 @@ class PastJournalEntryPage extends StatefulWidget {
 }
 
 class _PastJournalEntryPageState extends State<PastJournalEntryPage> {
+  bool isAdviceExpanded = false;
+  bool isJournalEntryExpanded = false;
+
+  String processAdvice(String advice) {
+    // Remove all bold formatting (e.g., **text**)
+    //String noBoldText = advice.replaceAll(RegExp(r'\*\*(.*?)\*\*'), (match) => match.group(1)!);
+
+    // Remove all subsection titles (e.g., **Title:**)
+    String noSubsectionTitles = advice.replaceAll(RegExp(r'\*\*.*?:\*\*'), '');
+
+    // Remove asterisks
+    String cleanedAdvice = noSubsectionTitles.replaceAll('*', '').replaceAll(RegExp(r'\n{2,}'), '\n\n');
+
+    return cleanedAdvice;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-            color: const Color(0xFFFFFCF2),
-            child: Padding (
-              padding: EdgeInsets.all (30.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        color: const Color(0xFFFFFCF2),
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat.MMMEd().format(widget.dateTime),
-                        style: GoogleFonts.rubik(
-                          fontSize: 40.0,
-                          fontStyle: FontStyle.italic,
-                          fontWeight: FontWeight.w400,
-                          color: const Color(0xFF110340),
-                        ),
+                  Text(
+                    DateFormat.MMMEd().format(widget.dateTime),
+                    style: GoogleFonts.rubik(
+                      fontSize: 40.0,
+                      fontStyle: FontStyle.italic,
+                      fontWeight: FontWeight.w400,
+                      color: const Color(0xFF110340),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 40, color: Color(0xFFFFB12B)),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20.0),
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFB12B),
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                child: Text(
+                  widget.emotions.isNotEmpty ? widget.emotions[0] : "",
+                  style: GoogleFonts.rubik(
+                    fontSize: 35,
+                    color: const Color(0xFFFFFCF2),
+                    height: 1,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20.0),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: <Widget>[
+                      // Advice Expansion Tile
+                      _buildExpansionTile(
+                        title: "Advice",
+                        content: processAdvice(widget.advice),
+                        isExpanded: isAdviceExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            isAdviceExpanded = expanded;
+                          });
+                        },
                       ),
-                      IconButton(
-                        icon: Icon(Icons.close, size: 40, color: const Color(0xFFFFB12B)),
-                        onPressed: () {
-                          Navigator.pop(context);
+                      const SizedBox(height: 20.0),
+                      // Journal Entry Expansion Tile
+                      _buildExpansionTile(
+                        title: "Journal Entry",
+                        content: widget.content,
+                        isExpanded: isJournalEntryExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            isJournalEntryExpanded = expanded;
+                          });
                         },
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20.0),
-                  Container(
-                    padding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFB12B),
-                      borderRadius: BorderRadius.circular(30.0),
-                    ),
-                    child: Text(
-                      widget.emotions.isNotEmpty? widget.emotions [0]: "",
-                      style: GoogleFonts.rubik(
-                        fontSize: 35,
-                        color: const Color(0xFFFFFCF2),
-                        height: 1,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20.0),
-                  Expanded(
-                    child: Column (
-                      children: <Widget> [
-                        Expanded(
-                          child: ExpansionTile(
-                            title: Text(
-                              "Advice",
-                              style: GoogleFonts.rubik(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF482BAD),
-                              ),
-                            ),
-                            trailing: Icon(
-                                Icons.arrow_drop_down_circle
-                            ),
-                            children: <Widget>[
-                              Container(
-                                padding: const EdgeInsets.all(20.0),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF6D4),
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.3),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: SingleChildScrollView(
-                                  child: Text(
-                                    "blah",
-                                    style: GoogleFonts.rubik(
-                                      fontSize: 24,
-                                      color: const Color(0xFF482BAD),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: ExpansionTile(
-                            title: Text(
-                              "Journal Entry ${widget.entryNumber}",
-                              style: GoogleFonts.rubik(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF482BAD),
-                              ),
-                            ),
-                            trailing: Icon(
-                                  Icons.arrow_drop_down_circle
-                            ),
-                            children: <Widget>[
-                              Container(
-                                padding: const EdgeInsets.all(20.0),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF6D4),
-                                  borderRadius: BorderRadius.circular(20.0),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.3),
-                                      spreadRadius: 2,
-                                      blurRadius: 5,
-                                      offset: Offset(0, 3),
-                                    ),
-                                  ],
-                                ),
-                                child: SingleChildScrollView(
-                                  child: Text(
-                                    widget.content,
-                                    style: GoogleFonts.rubik(
-                                      fontSize: 24,
-                                      color: const Color(0xFF482BAD),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpansionTile({
+    required String title,
+    required String content,
+    required bool isExpanded,
+    required Function(bool) onExpansionChanged,
+  }) {
+    return Card(
+      elevation: 5,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20.0),
+      ),
+      child: ExpansionTile(
+        title: Text(
+          title,
+          style: GoogleFonts.rubik(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: const Color(0xFF482BAD),
+          ),
+        ),
+        trailing: Icon(
+          isExpanded ? Icons.expand_less : Icons.expand_more,
+          size: 35,
+          color: const Color(0xFF482BAD),
+        ),
+        onExpansionChanged: onExpansionChanged,
+        tilePadding: const EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SingleChildScrollView(
+              child: Text(
+                processAdvice(content),
+                style: GoogleFonts.rubik(
+                  fontSize: 18,
+                  color: const Color(0xFF482BAD),
+                  height: 1.5,
+                ),
               ),
             ),
+          ),
+          const SizedBox(height: 10),
+        ],
       ),
     );
   }

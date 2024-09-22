@@ -194,7 +194,7 @@ class _CalendarPageState extends State<CalendarPage> {
         color: Color(0xFF110340),
         borderRadius: BorderRadius.circular(35),
       ),
-      padding: EdgeInsets.only(top:55.0, left: 20.0, right: 20),
+      padding: EdgeInsets.only(top:70.0, left: 20.0, right: 20),
       child: Column(
         children: [
           Padding(
@@ -247,7 +247,6 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           _buildDayNames(dayNames),
           _buildDaysGrid(daysInMonth, weekdayOffset),
-          _buildFooter(),
         ],
       ),
     );
@@ -256,7 +255,7 @@ class _CalendarPageState extends State<CalendarPage> {
   Widget _buildDaysGrid(List<Day> daysInMonth, int weekdayOffset) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.only(top: 8.0, bottom: 20.0), // Add 20 px padding at the bottom
+        padding: const EdgeInsets.only(top: 20.0),
         child: GridView.builder(
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 7,
@@ -308,30 +307,6 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Widget _buildFooter() {
-    return Container(
-        decoration: BoxDecoration(
-        color: Color(0xFF110340),
-    borderRadius: BorderRadius.circular(35),
-    ), child: Container(
-      margin: const EdgeInsets.only(bottom: 95.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildColorBox(Colors.red),
-              _buildColorBox(Colors.green),
-              _buildColorBox(Colors.blue),
-            ],
-          ),
-        ],
-      ),
-    ),
-    );
-  }
 
 
   Widget _buildColorBox(Color color) {

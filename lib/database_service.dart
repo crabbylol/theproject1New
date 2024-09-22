@@ -15,7 +15,8 @@ class DatabaseService {
         "dateTime": Timestamp.fromDate(journalEntry.dateTime),
         "content": journalEntry.content,
         "userID": journalEntry.userID,
-        "emotions" : journalEntry.emotions
+        "emotions" : journalEntry.emotions,
+        "advice": journalEntry.advice
       });
     } catch (e) {
       print(e.toString());
@@ -30,9 +31,9 @@ class DatabaseService {
       final DateTime startDate = DateTime(selectedDateUtc.year, selectedDateUtc.month, selectedDateUtc.day);
       final DateTime endDate = startDate.add(const Duration(days: 1));
 
-      print(currentUser.uid);
-      print(Timestamp.fromDate(startDate));
-      print(Timestamp.fromDate(endDate));
+      //print(currentUser.uid);
+      //print(Timestamp.fromDate(startDate));
+      //print(Timestamp.fromDate(endDate));
 
       final query = _fire
         .collection("journalEntries")
@@ -49,7 +50,8 @@ class DatabaseService {
           dateTime: (doc['dateTime'] as Timestamp).toDate(),
           content: doc['content'],
           userID: doc['userID'],
-          emotions: doc['emotions']
+          emotions: doc['emotions'],
+          advice: doc['advice']
         );
       }).toList();
 
@@ -84,6 +86,7 @@ class DatabaseService {
           content: doc['content'],
           userID: doc['userID'],
           emotions: doc['emotions'],
+          advice: doc['advice']
         );
       }).toList();
 
