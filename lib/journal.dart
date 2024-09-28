@@ -28,9 +28,20 @@ class _JournalPageState extends State<JournalPage> {
   late final model = GenerativeModel(
     apiKey: dotenv.env['OPENAI_API_KEY']!, model: 'gemini-pro');
 
+  final _authService = AuthService();
+  String _username = '';
   List<String> emotions = [];
   String resultEmotions = '';
   String advice = '';
+
+  Future<void> _fetchUsername() async {
+    String? username = await _authService.getCurrentUsername(); // Fetch the username
+    if (username != null) {
+      setState(() {
+        _username = username; // Store it in the state
+      });
+    }
+  }
 
   final TextEditingController _textEditingController = TextEditingController();
   final _dbServivce = DatabaseService();
@@ -79,6 +90,7 @@ class _JournalPageState extends State<JournalPage> {
   void initState() {
     super.initState();
     _initializeTextField();
+    _fetchUsername(); // Call the method to fetch the username
   }
 
   void _initializeTextField() {
@@ -132,28 +144,43 @@ class _JournalPageState extends State<JournalPage> {
                   ),
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(left: 15.0),
-                    child: Text(
-                      'Hey,',
-                      style: GoogleFonts.rubik(
-                        fontSize: 75,
-                        color: const Color(0xFFFFDE59),
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Hey, ',
+                            style: GoogleFonts.rubik(
+                              fontSize: 45,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFFFFDE59),
+                            ),
+                          ),
+                          TextSpan(
+                            text: _username.isNotEmpty ? _username : 'there',
+                            style: GoogleFonts.rubik(
+                              fontSize: 45,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFFFFB12B),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(right: 15.0),
+                    padding: const EdgeInsets.only(top:8.0),
                     child: Text(
-                      'Name',
+                      'Ready to reflect?',
                       style: GoogleFonts.rubik(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 75,
-                        color: const Color(0xFFFFB12B),
+                        fontSize: 28,
+                        fontStyle: FontStyle.italic,
+                        color: const Color(0xFF482BAD),
                       ),
                     ),
                   ),

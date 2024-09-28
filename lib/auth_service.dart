@@ -44,12 +44,18 @@ class AuthService {
   }
 
   Future<String?> getCurrentUsername() async {
-    final user = await _auth.currentUser;
+    final user = _auth.currentUser;
 
     if (user != null) {
-      final userDoc = await _fire.collection("users").doc(user.uid).get();
+      // Query the users collection for the document where the userID matches
+      final querySnapshot = await _fire
+          .collection("users")
+          .where("userId", isEqualTo: user.uid)
+          .get();
 
-      if (userDoc.exists) {
+      if (querySnapshot.docs.isNotEmpty) {
+        // Retrieve the first document found
+        final userDoc = querySnapshot.docs.first;
         final userData = userDoc.data() as Map<String, dynamic>;
         return userData["username"];
       } else {

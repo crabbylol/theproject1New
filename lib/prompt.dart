@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 import 'journal.dart';
 
 class PromptPage extends StatefulWidget {
@@ -18,6 +20,39 @@ class _PromptPageState extends State<PromptPage> {
     "Create a story with a surprising twist.",
   ];
   int currentPromptIndex = 0; // Index of the current prompt
+  String currentPrompt = '';
+
+  late final model = GenerativeModel(
+      apiKey: dotenv.env['OPENAI_API_KEY']!, model: 'gemini-pro');
+
+  Future<void> geminiFunctionCalling() async {
+    print("Running analysis");
+    String systemPrompt =
+        "Act as a therapist and give out a writing prompt that as a person reflect on their day and the choice they made. Make the prompts interesting while also being deeply reflective making it at most 1 sentence long. Make the prompts backed up by scienetic evidence.";
+    String userPrompt =
+        'Provide me with a prompt';
+
+    final chat = model.startChat(history: [
+      Content.text(userPrompt),
+      Content.model([TextPart(systemPrompt)])
+    ]);
+
+    final message = userPrompt;
+    final response = await chat.sendMessage(Content.text(message));
+
+    print("Analysis ran, printing result:");
+    currentPrompt = response.text!;
+    print("Result printed.");
+    print(currentPrompt);
+
+    if (!mounted) return;
+
+    // setState(() {
+    //   emotions = resultEmotions.split(',');
+    //   emotions = emotions.map((emotion) => emotion.trim()).toList();
+    //   //print(emotions);
+    // });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,7 +86,7 @@ class _PromptPageState extends State<PromptPage> {
                         opacity: _currentPrompt.isEmpty ? 0.0 : 1.0,
                         duration: Duration(seconds: 1),
                         child: Text(
-                          prompts[currentPromptIndex],
+                          _currentPrompt,
                           textAlign: TextAlign.center,
                           style: GoogleFonts.rubik(
                             fontSize: 40,
@@ -61,7 +96,9 @@ class _PromptPageState extends State<PromptPage> {
                       ),
                       const SizedBox(height: 35.0),
                       ElevatedButton(
-                        onPressed: () => _refreshPrompt(),
+                        onPressed: () async {
+                          await geminiFunctionCalling();
+                        },
                         style: ButtonStyle(
                           backgroundColor: MaterialStateProperty.all<Color>(
                             const Color(0xFF472bad),
