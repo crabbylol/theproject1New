@@ -3,6 +3,8 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:intl/intl.dart';
+
+// Project-specific imports
 import 'package:theproject1/auth_service.dart';
 import 'package:theproject1/datedetailspage.dart';
 import 'package:theproject1/day.dart';
@@ -25,7 +27,7 @@ class _CalendarPageState extends State<CalendarPage> {
   int year = 0;
   int month = 0;
 
-  final _dbServivce = DatabaseService();
+  final _dbService = DatabaseService();
   Future<List<JournalEntry>>? monthlyEntries;
 
   late final model = GenerativeModel(
@@ -36,69 +38,17 @@ class _CalendarPageState extends State<CalendarPage> {
   List<String> emotions = [];
   String resultEmotions = '';
 
-  // Future<void> geminiFunctionCalling() async {
-  //   print("Running analysis");
-  //
-  //   // Revised system prompt:
-  //   String systemPrompt =
-  //       "Analyze the user's journal entries and identify the top three emotions the user might be feeling.";
-  //
-  //   // Combine all journal entries into a single string
-  //   String userPrompt = '';
-  //   await monthlyEntries!.then((entries) {
-  //     for (var entry in entries) {
-  //       userPrompt += entry.content + '\n';
-  //     }
-  //   });
-  //
-  //   // Pre-process the user prompt to remove unwanted characters (optional)
-  //   userPrompt = userPrompt.replaceAll(RegExp(r'[0-9\.,\n]'), '');
-  //
-  //   final chat = model.startChat(history: [
-  //     Content.text(userPrompt),
-  //     Content.model([TextPart(systemPrompt)])
-  //   ]);
-  //
-  //   final message = userPrompt;
-  //   final response = await chat.sendMessage(Content.text(message));
-  //
-  //   print("Analysis ran, printing result:");
-  //   resultEmotions = response.text!;
-  //   print("Result printed.");
-  //
-  //   if (!mounted) return;
-  //
-  //   setState(() {
-  //     // Extract the top three emotions using regular expressions
-  //     final emotionRegex = RegExp(r'(?!emotions|is|are|feeling|feel)(\w+)\s*:\s*(.*)');
-  //     final matches = emotionRegex.allMatches(resultEmotions);
-  //
-  //     emotions = matches.map((match) => match.group(1)!.toLowerCase()).toList();
-  //     emotions = emotions.take(3).toList(); // Take only the top three emotions
-  //
-  //     print(emotions);
-  //   });
-  // }
-
   @override
   void initState() {
     super.initState();
     year = widget.initialYear;
     month = widget.initialMonth;
-
-    monthlyEntries = _dbServivce.getJournalEntriesByMonthYear(year, month);
-
-    monthlyEntries!.then((entries) {
-      // Access entries here
-      //print("Number of entries: ${entries.length}");
-      //geminiFunctionCalling();
-    });
+    monthlyEntries = _dbService.getJournalEntriesByMonthYear(year, month);
   }
 
   @override
   Widget build(BuildContext context) {
     final _auth = AuthService();
-
     List<Day> daysInMonth = _generateDaysInMonth(year, month);
     List<String> dayNames = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
@@ -106,145 +56,86 @@ class _CalendarPageState extends State<CalendarPage> {
     final weekdayOffset = (firstDay.weekday - DateTime.monday) % 7;
 
     return Scaffold(
+      backgroundColor: const Color(0xFFFFFCF2),
       body: Center(
         child: Stack(
           children: [
-            Padding (
-              padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 32.0),
-              child:_buildLogoutButton(AuthService(), context),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 115.0, bottom: 50.0),
-              child: _buildMonthNavigation(
-                dayNames: dayNames,
-                daysInMonth: daysInMonth,
-                weekdayOffset: weekdayOffset,
-              ),
-            ),
+            // Logout button
+            _buildLogoutSection(_auth, context),
+
+            // Calendar navigation and day grid
+            _buildCalendarSection(dayNames, daysInMonth, weekdayOffset),
           ],
         ),
       ),
     );
   }
-  Widget _buildLogoutButton(AuthService auth, BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => JournalPage(),
-              ),
-            );
-          },
-          child: Container(
-            height: 55,
-            width: 55,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFB12B),
-              shape: BoxShape.circle,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                child: Icon(
-                  Icons.add,
-                  size: 40,
-                  color: const Color(0xFFFFFCF2),
-                ),
-              ),
-            ),
+
+  // Extracting smaller widget methods
+
+  Widget _buildLogoutSection(AuthService auth, BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 32.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          _buildIconButton(
+            icon: Icons.add,
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => JournalPage()));
+            },
           ),
-        ),
-        SizedBox(width: 18.0),
-        GestureDetector(
-          onTap: () async {
-            await auth.signout();
-            goToLogin(context);
-          },
-          child: Container(
-            height: 55,
-            width: 55,
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFB12B),
-              shape: BoxShape.circle,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Center(
-                child: Icon(
-                  Icons.logout_rounded,
-                  size: 41,
-                  color: const Color(0xFFFFFCF2),
-                ),
-              ),
-            ),
+          const SizedBox(width: 18.0),
+          _buildIconButton(
+            icon: Icons.logout_rounded,
+            onPressed: () async {
+              await auth.signout();
+              goToLogin(context);
+            },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildMonthNavigation({required List<String> dayNames, required List<Day> daysInMonth, required int weekdayOffset}) {
+  Widget _buildIconButton({required IconData icon, required VoidCallback onPressed}) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        height: 55,
+        width: 55,
+        decoration: BoxDecoration(
+          color: const Color(0xFFFFB12B),
+          shape: BoxShape.circle,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+            child: Icon(icon, size: 40, color: const Color(0xFFFFFCF2)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCalendarSection(List<String> dayNames, List<Day> daysInMonth, int weekdayOffset) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 115.0, bottom: 50.0),
+      child: _buildMonthNavigation(dayNames, daysInMonth, weekdayOffset),
+    );
+  }
+
+  Widget _buildMonthNavigation(List<String> dayNames, List<Day> daysInMonth, int weekdayOffset) {
     return Container(
       decoration: BoxDecoration(
-        color: Color(0xFF110340),
+        color: const Color(0xFF110340),
         borderRadius: BorderRadius.circular(35),
       ),
-      padding: EdgeInsets.only(top:70.0, left: 20.0, right: 20),
+      padding: const EdgeInsets.only(top: 70.0, left: 20.0, right: 20.0),
       child: Column(
         children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 15.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      month--;
-                      if (month == 0) {
-                        month = 12;
-                        year--;
-                      }
-                    });
-                  },
-                  icon: const Icon(
-                    Icons.arrow_back_ios_rounded,
-                    color: Color(0xFFFFFCF2),
-                    size: 35.0,
-                  ),
-                ),
-                Text(
-                  '${_getMonthName(month)} $year',
-                  style: GoogleFonts.rubik(
-                    color: const Color(0xFFFFB12B),
-                    fontWeight: FontWeight.w800,
-                    fontSize: 30,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      month++;
-                      if (month == 13) {
-                        month = 1;
-                        year++;
-                      }
-                    });
-                  },
-                  icon: const Icon(
-                    Icons.arrow_forward_ios_rounded,
-                    color: Color(0xFFFFFCF2),
-                    size: 35.0,
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildMonthHeader(),
           _buildDayNames(dayNames),
           _buildDaysGrid(daysInMonth, weekdayOffset),
         ],
@@ -252,43 +143,48 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Widget _buildDaysGrid(List<Day> daysInMonth, int weekdayOffset) {
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.only(top: 20.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 7,
+  Widget _buildMonthHeader() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 15.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          IconButton(
+            onPressed: _previousMonth,
+            icon: const Icon(Icons.arrow_back_ios_rounded, color: Color(0xFFFFFCF2), size: 35.0),
           ),
-          itemCount: daysInMonth.length + weekdayOffset,
-          itemBuilder: (BuildContext context, int index) {
-            if (index < weekdayOffset) {
-              return const SizedBox.shrink();
-            }
-            final day = daysInMonth[index - weekdayOffset];
-            return GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => DateDetailsPage(day: day)),
-                );
-              },
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  '${day.date}',
-                  style: GoogleFonts.rubik(
-                    color: const Color(0xFFFFFCF2),
-                    fontWeight: FontWeight.w400,
-                    fontSize: 20,
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
+          Text(
+            '${_getMonthName(month)} $year',
+            style: GoogleFonts.rubik(color: const Color(0xFFFFB12B), fontWeight: FontWeight.w800, fontSize: 30),
+          ),
+          IconButton(
+            onPressed: _nextMonth,
+            icon: const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFFFFCF2), size: 35.0),
+          ),
+        ],
       ),
     );
+  }
+
+  // Logic for navigating months
+  void _previousMonth() {
+    setState(() {
+      month--;
+      if (month == 0) {
+        month = 12;
+        year--;
+      }
+    });
+  }
+
+  void _nextMonth() {
+    setState(() {
+      month++;
+      if (month == 13) {
+        month = 1;
+        year++;
+      }
+    });
   }
 
   Widget _buildDayNames(List<String> dayNames) {
@@ -297,75 +193,63 @@ class _CalendarPageState extends State<CalendarPage> {
       children: dayNames.map((name) {
         return Text(
           name,
-          style: GoogleFonts.rubik(
-            fontWeight: FontWeight.w500,
-            fontSize: 20,
-            color: const Color(0xFFFFFCF2),
-          ),
+          style: GoogleFonts.rubik(fontWeight: FontWeight.w500, fontSize: 20, color: const Color(0xFFFFFCF2)),
         );
       }).toList(),
     );
   }
 
-
-
-  Widget _buildColorBox(Color color) {
-    return Container(
-      color: color,
-      width: 100.0,
-      height: 100.0,
+  Widget _buildDaysGrid(List<Day> daysInMonth, int weekdayOffset) {
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.only(top: 20.0),
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 7),
+          itemCount: daysInMonth.length + weekdayOffset,
+          itemBuilder: (BuildContext context, int index) {
+            if (index < weekdayOffset) return const SizedBox.shrink();
+            final day = daysInMonth[index - weekdayOffset];
+            return GestureDetector(
+              onTap: () => _navigateToDayDetails(day),
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  '${day.date}',
+                  style: GoogleFonts.rubik(color: const Color(0xFFFFFCF2), fontWeight: FontWeight.w400, fontSize: 20),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
     );
   }
 
+  void _navigateToDayDetails(Day day) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => DateDetailsPage(day: day)));
+  }
+
+  // Helper methods
+
   List<Day> _generateDaysInMonth(int year, int month) {
     List<Day> days = [];
-
     int daysInMonth = DateTime(year, month + 1, 0).day;
-
     for (int i = 1; i <= daysInMonth; i++) {
       DateTime date = DateTime(year, month, i);
       int weekday = date.weekday % 7;
       days.add(Day(date: i, weekday: weekday, month: month, year: year));
     }
-
     return days;
   }
 
   String _getMonthName(int month) {
-    switch (month) {
-      case 1:
-        return 'Jan';
-      case 2:
-        return 'Feb';
-      case 3:
-        return 'Mar';
-      case 4:
-        return 'Apr';
-      case 5:
-        return 'May';
-      case 6:
-        return 'Jun';
-      case 7:
-        return 'Jul';
-      case 8:
-        return 'Aug';
-      case 9:
-        return 'Sep';
-      case 10:
-        return 'Oct';
-      case 11:
-        return 'Nov';
-      case 12:
-        return 'Dec';
-      default:
-        return '';
-    }
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return monthNames[month - 1];
   }
 
   void goToLogin(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const LoginPageWithEmail()),
-    );
+    Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPageWithEmail()));
   }
 }

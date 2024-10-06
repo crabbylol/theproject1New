@@ -39,7 +39,7 @@ class _DateDetailsPageState extends State<DateDetailsPage> {
             color: const Color(0xFFFFFCF2),
           ),
           Padding(
-            padding: const EdgeInsets.all(16.0), // Add padding here
+            padding: const EdgeInsets.only(top: 50.0, left: 16.0, right: 16.0),
             child: Column(
               children: <Widget>[
                 Row(
@@ -103,7 +103,7 @@ class _DateDetailsPageState extends State<DateDetailsPage> {
                                         margin: const EdgeInsets.only(bottom: 20),
                                         decoration: BoxDecoration(
                                           color: const Color(0xFFFFB12B),
-                                          borderRadius: BorderRadius.circular(30.0),
+                                          borderRadius: BorderRadius.circular(20.0),
                                         ),
                                         child: Stack(
                                           children: [
@@ -126,7 +126,7 @@ class _DateDetailsPageState extends State<DateDetailsPage> {
                                               child: Text(
                                                 '$amPm',
                                                 style: GoogleFonts.rubik(
-                                                  fontSize: 190,
+                                                  fontSize: 170, // Reduced transparency for cleaner look
                                                   color: const Color(0xFFFFFCF2).withOpacity(0.25),
                                                   height: 0.9,
                                                 ),
